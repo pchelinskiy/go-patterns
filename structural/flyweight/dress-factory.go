@@ -1,0 +1,47 @@
+package flyweight
+
+import (
+	"fmt"
+	"sync"
+)
+
+const (
+	//TerroristDressType terrorist dress type
+	TerroristDressType = "tDress"
+	//CounterTerrroristDressType terrorist dress type
+	CounterTerrroristDressType = "ctDress"
+)
+
+var (
+	instance *DressFactory
+	once     sync.Once
+)
+
+type DressFactory struct {
+	DressMap map[string]Dress
+}
+
+func (d *DressFactory) GetDressByType(dressType string) (Dress, error) {
+	if d.DressMap[dressType] != nil {
+		return d.DressMap[dressType], nil
+	}
+
+	if dressType == TerroristDressType {
+		d.DressMap[dressType] = newTerroristDress()
+		return d.DressMap[dressType], nil
+	}
+	if dressType == CounterTerrroristDressType {
+		d.DressMap[dressType] = newCounterTerroristDress()
+		return d.DressMap[dressType], nil
+	}
+
+	return nil, fmt.Errorf("wrong dress type passed")
+}
+
+func GetDressFactorySingleInstance() *DressFactory {
+	once.Do(func() {
+		instance = &DressFactory{DressMap: make(map[string]Dress)}
+	})
+
+	return instance
+}
